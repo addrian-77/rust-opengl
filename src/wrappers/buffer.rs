@@ -24,14 +24,7 @@ pub fn create_buffers(gl: &GlFns) {
 
 pub fn update_buffer(gl: &GlFns, vertices: &Vec<Vertex>, colors: &Vec<Color>) {
     unsafe {
-        gl.BufferData(
-            GL_ARRAY_BUFFER,
-            size_of_val(&vertices.to_owned()) as isize,
-            vertices.to_owned().as_ptr().cast(),
-            GL_STATIC_DRAW,
-        );
-
-        
+        gl.EnableVertexAttribArray(0);
         gl.VertexAttribPointer(
             0,
             3,
@@ -40,7 +33,27 @@ pub fn update_buffer(gl: &GlFns, vertices: &Vec<Vertex>, colors: &Vec<Color>) {
             size_of::<Vertex>() as i32,
             0 as *const _,
         );
-        gl.EnableVertexAttribArray(0);
+        gl.BufferData(
+            GL_ARRAY_BUFFER,
+            size_of_val(&vertices.to_owned()) as isize,
+            vertices.to_owned().as_ptr().cast(),
+            GL_STATIC_DRAW,
+        );
+        gl.EnableVertexAttribArray(1);
+        gl.VertexAttribPointer(
+            1,
+            4,
+            GL_FLOAT,
+            0,
+            0,
+            0 as *const _,
+        );
+        gl.BufferData(
+            GL_ARRAY_BUFFER,
+            size_of_val(&colors.to_owned()) as isize,
+            colors.to_owned().as_ptr().cast(),
+            GL_STATIC_DRAW,
+        );
     }
 }
 
@@ -50,6 +63,6 @@ pub fn update_buffer(gl: &GlFns, vertices: &Vec<Vertex>, colors: &Vec<Color>) {
 // this function adds a triangle to the buffer
 
 pub fn add_triangle(vertices: &mut Vec<Vertex>, colors: &mut Vec<Color>, triangle: Triangle, color: Color) {
-    colors.extend_from_slice(&[color]);
+    colors.extend_from_slice(&[color, color, color]);
     vertices.extend_from_slice(&triangle);
 }

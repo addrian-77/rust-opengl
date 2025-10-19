@@ -49,7 +49,7 @@ fn main() {
         let mut vertices: Vec<Vertex> = Vec::new();
         let mut colors: Vec<Color> = Vec::new();
         let triangle: Triangle = [[-0.5, -0.5, 0.0], [0.5, -0.5, 0.0], [0.0, 0.5, 0.0]];
-        let color: Color = [0.5, 0.3, 0.0, 1.0];
+        let color: Color = [0.5, 0.3, 0.0, 0.5];
         add_triangle(&mut vertices, &mut colors, triangle, color);
         update_buffer(&gl, &vertices, &colors);
 
