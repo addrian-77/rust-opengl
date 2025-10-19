@@ -48,6 +48,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "chlorine"
+version = "1.0.13"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c00d31b1d19317b4777ec879192d3745bd97d05262b4b19cb1dda284b9d22f19"
+
+[[package]]
 name = "fast-srgb8"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -60,6 +66,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0c600c8c2396ad4229ce7c79dcac0cbe1be5fad1dc61b639573cbddeaed1a661"
 dependencies = [
  "bool32",
+]
+
+[[package]]
+name = "gl33"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "29b2b7ada5ed872363f5d27e54e7cae69148cb5e4d05aa3cac1a40c30519bda3"
+dependencies = [
+ "chlorine",
 ]
 
 [[package]]
@@ -93,15 +108,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "915b1b472bc21c53464d6c8461c9d3af805ba1ef837e1cac254428f4a77177b1"
 dependencies = [
  "malloc_buf",
-]
-
-[[package]]
-name = "ogl33"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "824cf1a81ae16877f90e9cdc4dcb51c833a0f8da6a7ca36a782a3a970fcd3e32"
-dependencies = [
- "libc",
 ]
 
 [[package]]
@@ -145,8 +151,8 @@ version = "0.1.0"
 dependencies = [
  "beryllium",
  "bytemuck",
+ "gl33",
  "imagine",
- "ogl33",
  "ultraviolet",
 ]
 

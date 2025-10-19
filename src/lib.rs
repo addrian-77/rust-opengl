@@ -7,10 +7,10 @@ use beryllium::{
     video::{CreateWinArgs, GlContextFlags, GlProfile, GlWindow},
 };
 use core::convert::{TryFrom, TryInto};
-use ogl33::*;
+use gl33::{global_loader::*, *};
 
-pub fn clear_color(r: f32, g: f32, b: f32, a: f32) {
-    unsafe { glClearColor(r, g, b, a) }
+pub fn clear_color(gl: &GlFns, r: f32, g: f32, b: f32, a: f32) {
+    unsafe { gl.ClearColor(r, g, b, a) }
 }
 
 pub fn create_window(sdl: &Sdl, window_title: &str, width: i32, height: i32) -> GlWindow {
