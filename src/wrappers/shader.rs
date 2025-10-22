@@ -55,6 +55,7 @@ pub fn create_program(gl: &GlFns) -> u32 {
 
         // gl.UseProgram(shader_program);
         println!("created program with id {shader_program}");
+        gl.UseProgram(shader_program);
         shader_program
     }
 }

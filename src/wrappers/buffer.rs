@@ -47,8 +47,8 @@ pub fn create_buffers(
             3,
             GL_FLOAT,
             0,
-            0,
-            // 3 * size_of::<f32>() as i32,
+            // 0,
+            3 * size_of::<f32>() as i32,
             0 as *const _,
         );
         gl.EnableVertexAttribArray(0); // also enable it
@@ -64,14 +64,38 @@ pub fn create_buffers(
 // }
 // this function adds a triangle to the buffer
 
-pub fn add_triangle(data: &mut Vec<Vertex>, data_indices: &mut Vec<u32>, triangle: Triangle) {
-    data.extend_from_slice(&[[0.05, 0.05, 0.0]]);
-    data.extend_from_slice(&[[0.05, -0.05, 0.0]]);
-    data.extend_from_slice(&[[-0.05, -0.05, 0.0]]);
-    data.extend_from_slice(&[[-0.05, 0.05, 0.0]]);
-    let index = (data.len() / 3) as u32;
+pub fn add_cube(data: &mut Vec<Vertex>, data_indices: &mut Vec<u32>, coords: (f32, f32)) {
+    let width: f32 = 800.0;
+    let height: f32 = 600.0;
+
+    // let x: f32 = coords.0 / width;
+    // let y: f32 = coords.1  / height;
+    let x = coords.0;
+    let y = coords.1;
+
+    data.extend_from_slice(&[[-x, -y, x]]);
+    data.extend_from_slice(&[[x, -y, x]]);
+    data.extend_from_slice(&[[x, y, x]]);
+    data.extend_from_slice(&[[-x, y, x]]);
+    data.extend_from_slice(&[[-x, -y, -x]]);
+    data.extend_from_slice(&[[x, -y, -x]]);
+    data.extend_from_slice(&[[x, y, -x]]);
+    data.extend_from_slice(&[[-x, y, -x]]);
+    let mut index = (data.len() / 8) as u32;
+    println!("index is {index}");
+    index = 1;
     data_indices.extend_from_slice(&[
-        0, 3, 1, 
-        1, 3, 2
+        index - 1, index, index + 1,
+        index + 1, index + 2, index - 1,
+        index, index + 4, index + 5,
+        index + 5, index + 1, index,
+        index + 6, index + 5, index + 4,
+        index + 4, index + 3, index + 6,
+        index + 3, index - 1, index + 2,
+        index + 2, index + 6, index + 3,
+        index + 3, index + 4, index,
+        index, index - 1, index + 3,
+        index + 2, index + 1, index + 5,
+        index + 5, index + 6, index + 3
     ]);
 }

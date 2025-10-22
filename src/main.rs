@@ -49,7 +49,7 @@ fn main() {
         let mut data_indices: Vec<u32> = Vec::new();
         let triangle: Triangle = [[0.5, -0.5, 0.0], [-0.5, -0.5, 0.0], [0.0, 0.5, 0.0]];
 
-        add_triangle(&mut data, &mut data_indices, triangle);
+        add_cube(&mut data, &mut data_indices, (0.1, 0.1));
 
         println!("bef");
         create_buffers(
@@ -71,6 +71,8 @@ fn main() {
         let transform: String = "transform".to_string();
         let color: String = "color".to_string();
         // this is where the main loop starts
+        gl.Enable(GL_DEPTH_TEST);
+        gl.PolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         'main_loop: loop {
             // handle events this frame
             while let Some((event, _timestamp)) = sdl.poll_events() {
@@ -124,8 +126,7 @@ fn main() {
             }
 
             // clear_color(&gl, r, g, b, 1.0);
-            gl.Clear(GL_COLOR_BUFFER_BIT);
-            gl.UseProgram(program_id);
+            gl.Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             // println!("data {data:?}");
             // println!("indices {data_indices:?}");
@@ -134,15 +135,15 @@ fn main() {
 
             let transform_loc = gl.GetUniformLocation(program_id, transform.as_ptr().cast());
             let transform_mat: Transform = [
-                [1.0, 0.0, 0.0, -0.8],
-                [0.0, 1.0, 0.0, -0.9],
-                [0.0, 0.0, 1.0, 1.0],
+                [g, 0.0, 0.0, 0.0],
+                [0.0, r, 0.0, 0.0],
+                [0.0, 0.0, b, 0.0],
                 [0.0, 0.0, 0.0, 1.0],
             ];
-            gl.UniformMatrix4fv(transform_loc, 1, 0, transform_mat.as_ptr().cast());
+            gl.UniformMatrix4fv(transform_loc, 1, 1, transform_mat.as_ptr().cast());
 
             let color_loc = gl.GetUniformLocation(program_id, color.as_ptr().cast());
-            let color_vec: Color = [1.0, 1.0, 0.0, 1.0];
+            let color_vec: Color = [b, r, g, 1.0];
             println!(
                 "transform loc {:?} color loc {:?}",
                 transform_loc, color_loc
@@ -153,9 +154,12 @@ fn main() {
             //     color.as_ptr()
             // );
             gl.Uniform4fv(color_loc, 1, color_vec.as_ptr().cast());
-
+            
             // println!("transform {transform}");
-            gl.DrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0 as *const _);
+
+            // let mut size: *mut i32 = std::ptr::null_mut();
+            // gl.GetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, size);
+            gl.DrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0 as *const _);
 
             win.swap_window();
             let (w, h) = win.get_window_size();
