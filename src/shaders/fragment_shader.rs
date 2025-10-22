@@ -1,8 +1,8 @@
 pub const FRAG_SHADER: &str = r#"#version 330 core
-	in vec4 fragmentColor;
-	out vec4 color;
+	uniform vec4 color;
+	out vec4 fragCol;
 
 	void main() {
-		color = fragmentColor;
+		fragCol = color;
 	}
 "#;

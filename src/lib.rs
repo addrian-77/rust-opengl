@@ -27,6 +27,7 @@ pub fn create_window(sdl: &Sdl, window_title: &str, width: i32, height: i32) -> 
             title: window_title,
             width,
             height,
+            resizable: true,
             ..Default::default()
         })
         .expect("couldn't make a window and context");

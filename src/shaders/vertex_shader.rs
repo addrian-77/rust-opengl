@@ -1,11 +1,11 @@
 pub const VERT_SHADER: &str = r#"#version 330 core
 	layout (location = 0) in vec3 pos;
-	layout (location = 1) in vec4 vertexColor;
-	out vec4 fragmentColor;
+	uniform mat4 transform;
 
 	void main() {
-		gl_Position = vec4(pos.x, pos.y, pos.z, 1.0);
+		gl_Position.xyz = pos;
+		gl_Position.w = 1.0;
 
-		fragmentColor = vertexColor;
+		gl_Position = transform * gl_Position;
 	}
 "#;
