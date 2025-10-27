@@ -13,7 +13,7 @@ use rust_opengl::*;
 mod shaders;
 
 mod types;
-use crate::types::types::{Color, Transform, Triangle, Vertex};
+use crate::types::types::{Color, Shape, GameObjects, Transform, Triangle, Vertex};
 
 mod wrappers;
 use wrappers::buffer::*;
@@ -41,26 +41,44 @@ fn main() {
         let program_id = create_program(&gl);
 
         // this function creates vao and vbo
-        let mut vao: u32 = 0;
-        let mut vbo: u32 = 0;
-        let mut ibo: u32 = 0;
+        // let mut vao: u32 = 0;
+        // let mut vbo: u32 = 0;
+        // let mut ibo: u32 = 0;
 
-        let mut data: Vec<Vertex> = Vec::new();
-        let mut data_indices: Vec<u32> = Vec::new();
-        let triangle: Triangle = [[0.5, -0.5, 0.0], [-0.5, -0.5, 0.0], [0.0, 0.5, 0.0]];
+        // let mut data: Vec<Vertex> = Vec::new();
+        // let mut data_indices: Vec<u32> = Vec::new();
+        // let triangle: Triangle = [[0.5, -0.5, 0.0], [-0.5, -0.5, 0.0], [0.0, 0.5, 0.0]];
 
-        add_cube(&mut data, &mut data_indices, (0.1, 0.1));
+        // add_cube(&mut data, &mut data_indices, (0.1, 0.1));
+
+        // let triangle: Shape = Shape::new_triangle(0.2, 0.2);
+        let mut square: Shape = Shape::new_cube(0.0, 0.0, 0.0, 0.3);
+        square.create_buffers(&gl, &program_id);
+        let mut shapes: GameObjects = GameObjects::new();
+        shapes.add_shape(square);
+        // shapes.add_shape(triangle);
+
+        // println!("debug shapes vectors: {:?}", shapes.shapes.);
+        // println!("debug indices {:?}", shapes.indices);
+        // println!("debug last index {}", shapes.last_index);
+        // panic!();
+
+        // for shape in &shapes.shapes {
+        //     data.extend_from_slice(&shape.vertex);
+        // }
+        // data_indices.extend_from_slice(&shapes.indices);
 
         println!("bef");
-        create_buffers(
-            &gl,
-            &mut vao,
-            &mut vbo,
-            &mut ibo,
-            &mut data,
-            &mut data_indices,
-        );
-        println!("buff");
+        // create_buffers(
+        //     &gl,
+        //     &mut vao,
+        //     &mut vbo,
+        //     &mut ibo,
+        //     &mut data,
+        //     &mut data_indices,
+        // );
+        // println!("buff");
+        // println!("indices len {:?}", data_indices.len());
         // boilerplate end
 
         let mut r = 0.1;
@@ -68,28 +86,67 @@ fn main() {
         let mut b = 0.0;
         println!("reached");
 
-        let transform: String = "transform".to_string();
-        let color: String = "color".to_string();
         // this is where the main loop starts
-        gl.Enable(GL_DEPTH_TEST);
+        // gl.Enable(GL_DEPTH_TEST);
         gl.PolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        // panic!();
         'main_loop: loop {
             // handle events this frame
+            let (w, h) = win.get_window_size();
+
             while let Some((event, _timestamp)) = sdl.poll_events() {
                 // print!("received event {:?}", event);
+
                 match event {
                     // Event::Key { win_id, pressed, repeat, scancode, keycode, modifiers }
-                    Event::MouseMotion {
-                        win_id,
-                        mouse_id,
-                        button_state,
-                        x_win,
-                        y_win,
-                        x_delta,
-                        y_delta,
+                    Event::MouseButton {
+                        win_id: _,
+                        mouse_id: _,
+                        button,
+                        pressed,
+                        clicks: _,
+                        x,
+                        y,
                     } => {
-                        println!("mouse pos: {x_win}, {y_win}")
+                        if pressed {
+                            // println!("pressed? {pressed}");
+                            println!("pressed button {button} at x: {x} y: {y}");
+                            let normalized_x: f32 = 2.0 * x as f32 / w as f32 - 1.0;
+                            let normalized_y: f32 = -2.0 * y as f32 / h as f32 + 1.0;
+
+                            let mut new_triangle = Shape::new_square(normalized_x, normalized_y, 0.1);
+                            new_triangle.create_buffers(&gl, &program_id);
+                            shapes.add_shape(new_triangle);
+                            // data.clear();
+                            // data_indices.clear();
+                            // for shape in &shapes.shapes {
+                            //     data.extend_from_slice(&shape.vertex);
+                            // }
+                            // data_indices.extend_from_slice(&shapes.indices);
+                            // println!("current data {data:?}");
+                            // println!("current indices {data_indices:?}");
+                            // println!("new coords x {normalized_x}, new coord y {normalized_y}");
+                            // create_buffers(
+                            //     &gl,
+                            //     &mut vao,
+                            //     &mut vbo,
+                            //     &mut ibo,
+                            //     &mut data,
+                            //     &mut data_indices,
+                            // );
+                        }
                     }
+                    // Event::MouseMotion {
+                    //     win_id: _,
+                    //     mouse_id: _,
+                    //     button_state: _,
+                    //     x_win,
+                    //     y_win,
+                    //     x_delta: _,
+                    //     y_delta: _,
+                    // } => {
+                    //     println!("mouse pos: {x_win}, {y_win}")
+                    // }
                     Event::Key {
                         win_id: _,
                         pressed: _,
@@ -109,6 +166,9 @@ fn main() {
                 }
             }
 
+            // gl.BindVertexArray(vao);
+            // bind all the arrays?
+            let _ = shapes.shapes.iter().for_each(|shape| gl.BindVertexArray(shape.vao));    // this might not be needed, we might just be missing the transform and color
             if r < 1.0 {
                 r += 0.1;
             } else {
@@ -131,42 +191,53 @@ fn main() {
             // println!("data {data:?}");
             // println!("indices {data_indices:?}");
             // println!("indices len {:?}", data_indices.len());
-            gl.BindVertexArray(vao);
 
-            let transform_loc = gl.GetUniformLocation(program_id, transform.as_ptr().cast());
-            let transform_mat: Transform = [
-                [g, 0.0, 0.0, 0.0],
-                [0.0, r, 0.0, 0.0],
-                [0.0, 0.0, b, 0.0],
-                [0.0, 0.0, 0.0, 1.0],
-            ];
-            gl.UniformMatrix4fv(transform_loc, 1, 1, transform_mat.as_ptr().cast());
+            // let transform_loc = gl.GetUniformLocation(program_id, transform.as_ptr().cast());
+            // let transform_mat: Transform = [
+            //     // [
+            //     [1.0, 0.0, 0.0, 0.0],
+            //     [0.0, 1.0, 0.0, 0.0],
+            //     [0.0, 0.0, 1.0, 0.0],
+            //     [0.0, 0.0, 0.0, 1.0],
+            //     // ],
+            //     // [
+            //     //     [r, 0.0, 0.0, 0.0],
+            //     //     [0.0, b, 0.0, 0.0],
+            //     //     [0.0, 0.0, g, 0.0],
+            //     //     [0.0, 0.0, 0.0, 1.0],
+            //     // ],
+            // ];
+            // gl.UniformMatrix4fv(transform_loc, 1, 1, transform_mat.as_ptr().cast());
 
-            let color_loc = gl.GetUniformLocation(program_id, color.as_ptr().cast());
-            let color_vec: Color = [b, r, g, 1.0];
-            println!(
-                "transform loc {:?} color loc {:?}",
-                transform_loc, color_loc
-            );
-            // println!(
-            //     "transform ptr {:?}, color_ptr {:?}",
-            //     transform.as_ptr(),
-            //     color.as_ptr()
-            // );
-            gl.Uniform4fv(color_loc, 1, color_vec.as_ptr().cast());
-            
+            // let color_loc = gl.GetUniformLocation(program_id, color.as_ptr().cast());
+            // let color_vec: Color = [b, r, g, 1.0];
+            // // println!(
+            // //     "transform loc {:?} color loc {:?}",
+            // //     transform_loc, color_loc
+            // // );
+            // // println!(
+            // //     "transform ptr {:?}, color_ptr {:?}",
+            // //     transform.as_ptr(),
+            // //     color.as_ptr()
+            // // );
+            // gl.Uniform4fv(color_loc, 1, color_vec.as_ptr().cast());
+
             // println!("transform {transform}");
 
             // let mut size: *mut i32 = std::ptr::null_mut();
             // gl.GetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, size);
-            gl.DrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0 as *const _);
+            gl.DrawElements(
+                GL_TRIANGLES,
+                shapes.total_indices,
+                GL_UNSIGNED_INT,
+                0 as *const _,
+            );
 
             win.swap_window();
-            let (w, h) = win.get_window_size();
             // println!("current window size is {w}, {h}");
 
             // sleep for 0.5 seconds
-            sleep(Duration::new(0, 500000000));
+            sleep(Duration::new(0, 100000000));
         }
     }
 }

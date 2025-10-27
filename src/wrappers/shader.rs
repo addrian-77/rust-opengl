@@ -15,7 +15,7 @@ pub fn create_program(gl: &GlFns) -> u32 {
 
         let mut success = 0;
         gl.GetShaderiv(vertex_shader, GL_COMPILE_STATUS, &mut success);
-        print!("success {}", success);
+        println!("success {}", success);
 
         if success == 0 {
             let mut v: Vec<u8> = Vec::with_capacity(1024);
@@ -36,7 +36,7 @@ pub fn create_program(gl: &GlFns) -> u32 {
 
         let mut success = 0;
         gl.GetShaderiv(fragment_shader, GL_COMPILE_STATUS, &mut success);
-        print!("\nfragment success: {}", success);
+        println!("fragment success: {}", success);
         if success == 0 {
             let mut v: Vec<u8> = Vec::with_capacity(1024);
             let mut log_len = 0_i32;

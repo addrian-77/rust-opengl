@@ -14,21 +14,25 @@ pub fn create_buffers(
     data_indices: &mut Vec<u32>,
 ) {
     unsafe {
+        // println!("BEFORE: vao {vao} vbo {vbo} ibo {ibo}");
         gl.GenVertexArrays(1, vao);
         gl.GenBuffers(1, vbo);
         gl.GenBuffers(1, ibo);
+        // println!("after: vao {vao} vbo {vbo} ibo {ibo}");
+        assert_ne!(*vao, 0);
+        assert_ne!(*vbo, 0);
+        assert_ne!(*ibo, 0);
 
-        print!("data {data:?}, indices {data_indices:?}");
+        // println!("data {data:?}, indices {data_indices:?}");
         gl.BindVertexArray(*vao);
 
         gl.BindBuffer(GL_ARRAY_BUFFER, *vbo);
         gl.BufferData(
             GL_ARRAY_BUFFER,
-            size_of_val(&data.to_owned()) as isize,
-            data.to_owned().as_ptr().cast(),
+            (data.len() * size_of::<Vertex>()) as isize,
+            data.as_ptr().cast(),
             GL_STATIC_DRAW,
         );
-
         // // index 1 contains color r g b a
         // gl.VertexAttribPointer(1, 4, GL_FLOAT, 0, 4 * size_of::<f32>() as i32, 0 as *const _);
         // gl.EnableVertexAttribArray(1); // also enable it
@@ -36,7 +40,7 @@ pub fn create_buffers(
         gl.BindBuffer(GL_ELEMENT_ARRAY_BUFFER, *ibo);
         gl.BufferData(
             GL_ELEMENT_ARRAY_BUFFER,
-            size_of_val(&data_indices.to_owned()) as isize,
+            (data_indices.len() * size_of::<u32>()) as isize,
             data_indices.to_owned().as_ptr().cast(),
             GL_STATIC_DRAW,
         );
@@ -47,15 +51,14 @@ pub fn create_buffers(
             3,
             GL_FLOAT,
             0,
-            // 0,
             3 * size_of::<f32>() as i32,
             0 as *const _,
         );
         gl.EnableVertexAttribArray(0); // also enable it
 
-        gl.BindVertexArray(0); // unbind vao
         gl.BindBuffer(GL_ARRAY_BUFFER, 0); // unbind vbo
-        gl.BindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // unbind ebo
+        gl.BindVertexArray(0); // unbind vao
+        // gl.BindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // unbind ebo
     }
 }
 
@@ -63,39 +66,3 @@ pub fn create_buffers(
 
 // }
 // this function adds a triangle to the buffer
-
-pub fn add_cube(data: &mut Vec<Vertex>, data_indices: &mut Vec<u32>, coords: (f32, f32)) {
-    let width: f32 = 800.0;
-    let height: f32 = 600.0;
-
-    // let x: f32 = coords.0 / width;
-    // let y: f32 = coords.1  / height;
-    let x = coords.0;
-    let y = coords.1;
-
-    data.extend_from_slice(&[[-x, -y, x]]);
-    data.extend_from_slice(&[[x, -y, x]]);
-    data.extend_from_slice(&[[x, y, x]]);
-    data.extend_from_slice(&[[-x, y, x]]);
-    data.extend_from_slice(&[[-x, -y, -x]]);
-    data.extend_from_slice(&[[x, -y, -x]]);
-    data.extend_from_slice(&[[x, y, -x]]);
-    data.extend_from_slice(&[[-x, y, -x]]);
-    let mut index = (data.len() / 8) as u32;
-    println!("index is {index}");
-    index = 1;
-    data_indices.extend_from_slice(&[
-        index - 1, index, index + 1,
-        index + 1, index + 2, index - 1,
-        index, index + 4, index + 5,
-        index + 5, index + 1, index,
-        index + 6, index + 5, index + 4,
-        index + 4, index + 3, index + 6,
-        index + 3, index - 1, index + 2,
-        index + 2, index + 6, index + 3,
-        index + 3, index + 4, index,
-        index, index - 1, index + 3,
-        index + 2, index + 1, index + 5,
-        index + 5, index + 6, index + 3
-    ]);
-}
