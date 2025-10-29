@@ -15,8 +15,8 @@ pub fn create_program(gl: &GlFns) -> u32 {
 
         let mut success = 0;
         gl.GetShaderiv(vertex_shader, GL_COMPILE_STATUS, &mut success);
-        println!("success {}", success);
 
+        // panic if we fail to compile vertex shader
         if success == 0 {
             let mut v: Vec<u8> = Vec::with_capacity(1024);
             let mut log_len = 0_i32;
@@ -34,9 +34,9 @@ pub fn create_program(gl: &GlFns) -> u32 {
         );
         gl.CompileShader(fragment_shader);
 
+        // panic if we fail to compile fragment shader
         let mut success = 0;
         gl.GetShaderiv(fragment_shader, GL_COMPILE_STATUS, &mut success);
-        println!("fragment success: {}", success);
         if success == 0 {
             let mut v: Vec<u8> = Vec::with_capacity(1024);
             let mut log_len = 0_i32;
@@ -53,7 +53,6 @@ pub fn create_program(gl: &GlFns) -> u32 {
         gl.DeleteShader(vertex_shader);
         gl.DeleteShader(fragment_shader);
 
-        // gl.UseProgram(shader_program);
         println!("created program with id {shader_program}");
         gl.UseProgram(shader_program);
         shader_program

@@ -1,6 +1,6 @@
 use gl33::GlFns;
 
-use crate::wrappers::buffer::create_buffers;
+use crate::wrappers::buffer::{create_buffers, delete_buffers};
 
 pub type Vertex = [f32; 3]; // x,y,z
 pub type Triangle = [Vertex; 3];
@@ -23,7 +23,7 @@ enum ShapeTypes {
 }
 
 pub struct Shape {
-    pub vertex: Vec<Vertex>,
+    pub vertices: Vec<Vertex>,
     pub indices: Vec<u32>,
     typ: ShapeTypes,
     pub vao: u32,
@@ -32,49 +32,51 @@ pub struct Shape {
 }
 
 impl Shape {
+    pub fn translate(&mut self, x: f32, y: f32) {
+        // bind vbo
+        // create matrix
+        // update matrix?
+        todo!()
+    }
+
     pub fn create_buffers(&mut self, gl: &GlFns, program_id: &u32) {
-        create_buffers(gl, &mut self.vao, &mut self.vbo, &mut self.ibo, &mut self.vertex, &mut self.indices);
+        create_buffers(
+            gl,
+            &mut self.vao,
+            &mut self.vbo,
+            &mut self.ibo,
+            &mut self.vertices,
+            &mut self.indices,
+        );
         let transform: String = "transform".to_string();
         let color: String = "color".to_string();
-            unsafe {
-        
-        let transform_loc = gl.GetUniformLocation(*program_id, transform.as_ptr().cast());
+        unsafe {
+            let transform_loc = gl.GetUniformLocation(*program_id, transform.as_ptr().cast());
+            let color_loc = gl.GetUniformLocation(*program_id, color.as_ptr().cast());
+
+            if transform_loc == -1 || color_loc == -1 {
+                println!("failed, trying again?");
+                delete_buffers(gl, &mut self.vao, &mut self.vbo, &mut self.ibo);
+                Shape::create_buffers(self, gl, program_id);
+            }
+
+            // identity matrix so far
             let transform_mat: Transform = [
-                // [
                 [1.0, 0.0, 0.0, 0.0],
                 [0.0, 1.0, 0.0, 0.0],
                 [0.0, 0.0, 1.0, 0.0],
                 [0.0, 0.0, 0.0, 1.0],
-                // ],
-                // [
-                //     [r, 0.0, 0.0, 0.0],
-                //     [0.0, b, 0.0, 0.0],
-                //     [0.0, 0.0, g, 0.0],
-                //     [0.0, 0.0, 0.0, 1.0],
-                // ],
             ];
-                gl.UniformMatrix4fv(transform_loc, 1, 1, transform_mat.as_ptr().cast());
+            gl.UniformMatrix4fv(transform_loc, 1, 1, transform_mat.as_ptr().cast());
 
-                let color_loc = gl.GetUniformLocation(*program_id, color.as_ptr().cast());
-                println!("color loc? {color_loc}");
-                // panic!();
-                let color_vec: Color = [1.0, 1.0, 1.0, 1.0];
-                // println!(
-                //     "transform loc {:?} color loc {:?}",
-                //     transform_loc, color_loc
-                // );
-                // println!(
-                //     "transform ptr {:?}, color_ptr {:?}",
-                //     transform.as_ptr(),
-                //     color.as_ptr()
-                // );
-                gl.Uniform4fv(color_loc, 1, color_vec.as_ptr().cast());
-            }
+            let color_vec: Color = [1.0, 1.0, 1.0, 1.0];
+            gl.Uniform4fv(color_loc, 1, color_vec.as_ptr().cast());
+        }
     }
     pub fn new_cube(x: f32, y: f32, z: f32, size: f32) -> Self {
         // return the object
         Self {
-            vertex: vec![
+            vertices: vec![
                 [x, y, z + size],
                 [x + size, y, z + size],
                 [x + size, y + size, z + size],
@@ -94,7 +96,7 @@ impl Shape {
 
     pub fn new_square(x: f32, y: f32, size: f32) -> Self {
         Self {
-            vertex: vec![
+            vertices: vec![
                 [x, y, 0.0],
                 [x, y - size, 0.0],
                 [x + size, y - size, 0.0],
@@ -110,13 +112,34 @@ impl Shape {
 
     pub fn new_triangle(x: f32, y: f32) -> Self {
         Self {
-            vertex: vec![[x, -y, 0.0], [-x, -y, 0.0], [x, y, 0.0]],
+            vertices: vec![[x, -y, 0.0], [-x, -y, 0.0], [x, y, 0.0]],
             indices: get_indices_slice(0, &ShapeTypes::Triangle),
             typ: ShapeTypes::Triangle,
             vao: 0,
             vbo: 0,
             ibo: 0,
         }
+    }
+
+    pub fn contains(&self, x: f32, y: f32) -> bool {
+        match self.typ {
+            ShapeTypes::Cube => {
+                todo!()
+            }
+            ShapeTypes::Square => {
+                // what if we scale the shape? how should we store the coordinates?
+
+                // let shape_x = self.vertices[0][0];
+                // let shape_y = self.vertices[0][1];
+                // if
+                todo!()
+            }
+            ShapeTypes::Triangle => {
+                todo!()
+            }
+            _ => panic!("unknown shape?"),
+        }
+        true
     }
 }
 
@@ -135,15 +158,9 @@ impl GameObjects {
 
     pub fn add_shape(&mut self, shape: Shape) {
         self.total_indices += match shape.typ {
-            ShapeTypes::Cube => {
-                36
-            }
-            ShapeTypes::Square => {
-                6
-            }
-            ShapeTypes::Triangle => {
-                3
-            }
+            ShapeTypes::Cube => 36,
+            ShapeTypes::Square => 6,
+            ShapeTypes::Triangle => 3,
         };
         self.shapes.push(shape);
     }
