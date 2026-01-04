@@ -1,3 +1,5 @@
+use std::fmt;
+
 use gl33::GlFns;
 
 use crate::wrappers::buffer::{create_buffers, delete_buffers};
@@ -16,12 +18,16 @@ pub type Transform = [[f32; 4]; 4];
 // //
 // big TODO here
 
+#[derive(Clone)]
+
 enum ShapeTypes {
     Triangle,
     Square,
     Cube,
+    Empty,
 }
 
+#[derive(Clone)]
 pub struct Shape {
     pub vertices: Vec<Vertex>,
     pub indices: Vec<u32>,
@@ -73,6 +79,18 @@ impl Shape {
             gl.Uniform4fv(color_loc, 1, color_vec.as_ptr().cast());
         }
     }
+
+    pub fn new_empty() -> Self {
+        Self {
+            vertices: vec![],
+            indices: vec![],
+            typ: ShapeTypes::Empty,
+            vao: 0,
+            vbo: 0,
+            ibo: 0,
+        }
+    }
+
     pub fn new_cube(x: f32, y: f32, z: f32, size: f32) -> Self {
         // return the object
         Self {
@@ -123,23 +141,52 @@ impl Shape {
 
     pub fn contains(&self, x: f32, y: f32) -> bool {
         match self.typ {
-            ShapeTypes::Cube => {
-                todo!()
-            }
+            // ShapeTypes::Cube => {
+            //     println!("check cube")
+            // }
             ShapeTypes::Square => {
                 // what if we scale the shape? how should we store the coordinates?
 
-                // let shape_x = self.vertices[0][0];
-                // let shape_y = self.vertices[0][1];
-                // if
-                todo!()
+                let shape_xmin = self.vertices[0][0];
+                let shape_xmax = self.vertices[2][0];
+
+                let shape_ymin = self.vertices[1][1];
+                let shape_ymax = self.vertices[0][1];
+
+                println!("and x {x} y {y}");
+                println!("check square with xmin {shape_xmin} ymin {shape_ymin}");
+                println!("xmax {shape_xmax}, ymax {shape_ymax}");
+
+                if x >= shape_xmin && x <= shape_xmax && y >= shape_ymin && y <= shape_ymax {
+                    // this works
+                    println!("inside a shape");
+                    return true;
+                }
+                return false;
             }
-            ShapeTypes::Triangle => {
-                todo!()
+            // ShapeTypes::Triangle => {
+            //     todo!()
+            // }
+            _ => {
+                println!("check unimplemented shape");
+                return false;
             }
-            _ => panic!("unknown shape?"),
         }
-        true
+    }
+}
+
+impl fmt::Debug for Shape {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "Shape type {}",
+            match self.typ {
+                ShapeTypes::Cube => "cube",
+                ShapeTypes::Square => "square",
+                ShapeTypes::Triangle => "triangle",
+                ShapeTypes::Empty => "empty",
+            }
+        )
     }
 }
 
@@ -161,6 +208,7 @@ impl GameObjects {
             ShapeTypes::Cube => 36,
             ShapeTypes::Square => 6,
             ShapeTypes::Triangle => 3,
+            _ => -1,
         };
         self.shapes.push(shape);
     }

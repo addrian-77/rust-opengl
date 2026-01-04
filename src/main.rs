@@ -46,6 +46,8 @@ fn main() {
         clear_color(&gl, 0.2, 0.0, 0.0, 1.0);
         gl.PolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+        let empty_shape = Shape::new_empty();
+        let mut selected_shape: Shape = empty_shape.clone();
         'main_loop: loop {
             // we can use this to check for changes and scale everything on update
             let (w, h) = win.get_window_size();
@@ -53,6 +55,20 @@ fn main() {
             // handle events this frame
             while let Some((event, _timestamp)) = sdl.poll_events() {
                 match event {
+                    // mouse movement
+                    Event::MouseMotion {
+                        win_id: _,
+                        mouse_id: _,
+                        button_state: _,
+                        x_win,
+                        y_win,
+                        x_delta,
+                        y_delta,
+                    } => {
+                        // delta - difference from last poll, can be used for acceleration?
+                        // println!("mouse moved to {x_win} {y_win} delta? {x_delta} {y_delta}");
+                    }
+
                     // mouse buttons
                     Event::MouseButton {
                         win_id: _,
@@ -71,7 +87,7 @@ fn main() {
                                     let normalized_x: f32 = 2.0 * x as f32 / w as f32 - 1.0;
                                     let normalized_y: f32 = -2.0 * y as f32 / h as f32 + 1.0;
                                     let mut new_square =
-                                        Shape::new_square(normalized_x, normalized_y, 0.1);
+                                        Shape::new_square(normalized_x, normalized_y, 0.2);
                                     new_square.create_buffers(&gl, &program_id);
                                     objects.add_shape(new_square);
                                 }
@@ -81,9 +97,18 @@ fn main() {
                                     // check if we clicked a shape
                                     let normalized_x: f32 = 2.0 * x as f32 / w as f32 - 1.0;
                                     let normalized_y: f32 = -2.0 * y as f32 / h as f32 + 1.0;
-                                    for shape in &objects.shapes {
-                                        if shape.contains(normalized_x, normalized_y) {}
+                                    let mut found: bool = false;
+                                    for shape in objects.shapes.clone() {
+                                        if shape.contains(normalized_x, normalized_y) {
+                                            selected_shape = shape.clone();
+                                            found = true;
+                                            break;
+                                        }
                                     }
+                                    if !found {
+                                        selected_shape = empty_shape.clone();
+                                    }
+                                    println!("Selected shape is? {selected_shape:?}");
                                 }
                                 _ => {
                                     println!("unhandled")

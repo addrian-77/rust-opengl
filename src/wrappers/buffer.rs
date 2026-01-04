@@ -36,7 +36,6 @@ pub fn create_buffers(
             GL_STATIC_DRAW,
         );
 
-
         // set up ibo, this contains indices
         gl.BindBuffer(GL_ELEMENT_ARRAY_BUFFER, *ibo);
         // load indices into ibo
